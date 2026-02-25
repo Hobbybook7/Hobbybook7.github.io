@@ -1,11 +1,11 @@
-// Project Title
-// Your Name
-// Date
+// Interactive Scene - Flappy Bird
+// Ben Francis
+// 3/3/2026
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let gameState = "menu";
+let gameState = "Menu";
 let buttonW = 200;
 let buttonH = 80;
 let buttonX;
@@ -13,6 +13,7 @@ let buttonY;
 
 function preload() {
   imgBg = loadImage("images/FlappyBirdBackground.jpg");
+  imgCharacter = loadImage("images/FlappyBirdCharacter.png");
 }
 
 function setup() {
@@ -25,7 +26,10 @@ function setup() {
 }
 
 function draw() {
-  displayMenu();
+  if (gameState === "Menu") {
+    displayMenu();
+  }
+  playGame();
 }
 
 function displayMenu() {
@@ -35,6 +39,8 @@ function displayMenu() {
   textSize(buttonW / 4);
   textAlign(CENTER, CENTER);
   text("PLAY", width / 2, height / 2);
+  fill(0);
+  text("FLAPPY BIRD", width/2, height/4);
 }
 
 function mousePressed() {
@@ -42,8 +48,22 @@ function mousePressed() {
     mouseX > buttonX &&
     mouseX < buttonX + buttonW &&
     mouseY > buttonY &&
-    mouseY < buttonY + buttonH
+    mouseY < buttonY + buttonH &&
+    gameState === "Menu"
   ) {
     gameState = "Play";
+  }
+}
+
+function playGame() {
+  if (gameState === "Play") {
+    image(imgBg, 0, 0, width, height);
+    image(imgCharacter, width/2 - 75, height/2 - 75);
+  }
+}
+
+function keyPressed() {
+  if (key === "r") {
+    gameState = "End Game";
   }
 }
