@@ -26,6 +26,8 @@ function setup() {
 }
 
 function draw() {
+  fill(0);
+  rect(width/2-50, height+10, 50, 50);
   if (gameState === "Menu") {
     displayMenu();
   }
