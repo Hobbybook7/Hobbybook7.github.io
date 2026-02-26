@@ -10,6 +10,9 @@ let buttonW = 200;
 let buttonH = 80;
 let buttonX;
 let buttonY;
+let dx = -1;
+let characterY = 100;
+let currentTime;
 
 function preload() {
   imgBg = loadImage("images/FlappyBirdBackground.jpg");
@@ -26,8 +29,6 @@ function setup() {
 }
 
 function draw() {
-  fill(0);
-  rect(width/2-50, height+10, 50, 50);
   if (gameState === "Menu") {
     displayMenu();
   }
@@ -59,8 +60,12 @@ function mousePressed() {
 
 function playGame() {
   if (gameState === "Play") {
-    image(imgBg, 0, 0, width, height);
-    image(imgCharacter, width/2 - 75, height/2 - 75);
+    while (characterY < 600 && millis() - currentTime < 50) {
+      currentTime = millis();
+      characterY -= dx;
+      image(imgBg, 0, 0, width, height);
+      image(imgCharacter, width/2 - 75, characterY);
+    }
   }
 }
 
