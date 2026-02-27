@@ -10,9 +10,11 @@ let buttonW = 200;
 let buttonH = 80;
 let buttonX;
 let buttonY;
-let dx = -1;
-let characterY = 100;
-let currentTime;
+let dy;
+let characterY;
+let gravity;
+let currentTime = 0;
+let score = 0;
 
 function preload() {
   imgBg = loadImage("images/FlappyBirdBackground.jpg");
@@ -21,7 +23,6 @@ function preload() {
 
 function setup() {
   createCanvas(480, 800);
-  image(imgBg, 0, 0, width, height);
   buttonW = width/2.4;
   buttonH = height / 10;
   buttonX = width / 2 - buttonW / 2;
@@ -32,10 +33,16 @@ function draw() {
   if (gameState === "Menu") {
     displayMenu();
   }
-  playGame();
+  else if (gameState === "Play") {
+    playGame();
+  }
+  else {
+    endGame();
+  }
 }
 
 function displayMenu() {
+  image(imgBg, 0, 0, width, height);
   fill("green");
   rect(buttonX, buttonY, buttonW, buttonH);
   fill(255);
@@ -44,33 +51,58 @@ function displayMenu() {
   text("PLAY", width / 2, height / 2);
   fill(0);
   text("FLAPPY BIRD", width/2, height/4);
+  textSize(30);
+  text("Press SPACE or LMB to jump", width/2, height/1.5);
+  dy = 0;
+  characterY = 300;
+  gravity = 0.5;
 }
 
-function mousePressed() {
-  if (
-    mouseX > buttonX &&
-    mouseX < buttonX + buttonW &&
-    mouseY > buttonY &&
-    mouseY < buttonY + buttonH &&
-    gameState === "Menu"
-  ) {
-    gameState = "Play";
-  }
-}
 
 function playGame() {
   if (gameState === "Play") {
-    while (characterY < 600 && millis() - currentTime < 50) {
-      currentTime = millis();
-      characterY -= dx;
-      image(imgBg, 0, 0, width, height);
-      image(imgCharacter, width/2 - 75, characterY);
+    if (characterY <= 630) {
+      dy += gravity;
+      characterY += dy;
     }
+    else {
+      gameState = "End Game";
+    }
+    image(imgBg, 0, 0, width, height);
+    image(imgCharacter, width/2 - 75, characterY);
   }
+}
+
+function endGame() {
+  image(imgBg, 0, 0, width, height);
+  textSize(60);
+  textAlign(CENTER, CENTER);
+  text("GAME OVER!", width/2, height/4);
+  textSize(40);
+  text("High Score:", width/2, height/2);
+  text(score, width/2, height/1.8);
+  text("r to Restart", width/2, height/1.5);
+}
+
+function jump() {
+  dy = -10;
 }
 
 function keyPressed() {
   if (key === "r") {
-    gameState = "End Game";
+    gameState = "Menu";
+  }
+  if (keyCode === 32 && characterY >= 20) {
+    jump();
+  }
+}
+
+function mouseClicked() {
+  if (mouseX > buttonX && mouseX < buttonX + buttonW && mouseY > buttonY && mouseY < buttonY + buttonH && gameState === "Menu"
+  ) {
+    gameState = "Play";
+  }
+  if (gameState === "Play" && characterY >= 20) {
+    jump();
   }
 }
