@@ -15,8 +15,9 @@ let characterY;
 let gravity;
 let currentTime = 0;
 let score = 0;
+let highScore = 0;
 let birdHitboxDia = 58;
-let safeZoneHeight;
+let safeZoneHeight = birdHitboxDia*3;
 let safeZoneY;
 let floor = 630;
 let dx = -2;
@@ -33,7 +34,7 @@ function setup() {
   buttonH = height / 10;
   buttonX = width / 2 - buttonW / 2;
   buttonY = height / 2 - buttonH / 2;
-  safeZoneY = random(birdHitboxDia, floor - birdHitboxDia);
+  safeZoneY = random(birdHitboxDia, floor - safeZoneHeight - birdHitboxDia);
   safeZoneX = width - birdHitboxDia;
 }
 
@@ -50,6 +51,7 @@ function draw() {
 }
 
 function displayMenu() {
+  strokeWeight(1);
   image(imgBg, 0, 0, width, height);
   fill("green");
   rect(buttonX, buttonY, buttonW, buttonH);
@@ -84,23 +86,35 @@ function playGame() {
       gameState = "End Game";
     }
     createBirdSprite();
-    createPipes();
-    if (safeZoneX < 0) {
+    moveHoop();
+    if (safeZoneX <= 0) {
       safeZoneX = width - birdHitboxDia;
-      safeZoneY = random(birdHitboxDia, floor - birdHitboxDia);
+      safeZoneY = random(birdHitboxDia, floor - safeZoneHeight/2 - birdHitboxDia/2);
       score += 1;
     }
+    if (safeZoneX < width/4 + birdHitboxDia/2 && safeZoneX > width/4 - birdHitboxDia*1.5 - birdHitboxDia/2) {
+      console.log("In SafeZone");
+    }
   }
+  fill(0);
+  text("SCORE:", width/2, birdHitboxDia);
+  text(score, width/2, birdHitboxDia*1.5);
 }
 
 function endGame() {
+  if (score > highScore) {
+    highScore = score;
+  }
+  score = 0;
+  strokeWeight(1);
+  fill(0);
   image(imgBg, 0, 0, width, height);
   textSize(60);
   textAlign(CENTER, CENTER);
   text("GAME OVER!", width/2, height/4);
   textSize(40);
   text("High Score:", width/2, height/2);
-  text(score, width/2, height/1.8);
+  text(highScore, width/2, height/1.8);
   text("r to Restart", width/2, height/1.5);
 }
 
@@ -108,9 +122,9 @@ function jump() {
   dy = -8;
 }
 
-function createPipes() {
+function moveHoop() {
   safeZoneX += dx;
-  createPipeSafeZone(safeZoneX);
+  createHoop(safeZoneX);
 }
 
 function keyPressed() {
@@ -149,8 +163,8 @@ function createBirdSprite() {
   pop();
 }
 
-function createPipeSafeZone(x) {
-  safeZoneHeight = birdHitboxDia*2 + birdHitboxDia/2;
-  fill(0);
-  rect(x, safeZoneY, birdHitboxDia, safeZoneHeight);
+function createHoop(x) {
+  strokeWeight(5);
+  noFill();
+  rect(x, safeZoneY, birdHitboxDia*1.5, safeZoneHeight);
 }
