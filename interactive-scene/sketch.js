@@ -16,6 +16,11 @@ let gravity;
 let currentTime = 0;
 let score = 0;
 let birdHitboxDia = 58;
+let safeZoneHeight;
+let safeZoneY;
+let floor = 630;
+let dx = -2;
+let safeZoneX;
 
 function preload() {
   imgBg = loadImage("images/FlappyBirdBackground.jpg");
@@ -28,6 +33,8 @@ function setup() {
   buttonH = height / 10;
   buttonX = width / 2 - buttonW / 2;
   buttonY = height / 2 - buttonH / 2;
+  safeZoneY = random(birdHitboxDia, floor - birdHitboxDia);
+  safeZoneX = width - birdHitboxDia;
 }
 
 function draw() {
@@ -61,9 +68,10 @@ function displayMenu() {
 
 
 function playGame() {
+  image(imgBg, 0, 0, width, height);
   if (gameState === "Play") {
     dy += gravity;
-    if (imgCharacter.height/2 + characterY - birdHitboxDia <= 630) {
+    if (imgCharacter.height/2 + characterY - birdHitboxDia <= floor) {
       if (characterY > -birdHitboxDia/2-15) {
         characterY += dy;
       }
@@ -75,8 +83,13 @@ function playGame() {
     else {
       gameState = "End Game";
     }
-    image(imgBg, 0, 0, width, height);
     createBirdSprite();
+    createPipes();
+    if (safeZoneX < 0) {
+      safeZoneX = width - birdHitboxDia;
+      safeZoneY = random(birdHitboxDia, floor - birdHitboxDia);
+      score += 1;
+    }
   }
 }
 
@@ -93,6 +106,11 @@ function endGame() {
 
 function jump() {
   dy = -8;
+}
+
+function createPipes() {
+  safeZoneX += dx;
+  createPipeSafeZone(safeZoneX);
 }
 
 function keyPressed() {
@@ -117,7 +135,7 @@ function mouseClicked() {
 function createBirdSprite() {
   push();
   imageMode(CENTER);
-  translate(width/2, imgCharacter.height/2 + characterY);
+  translate(width/4, imgCharacter.height/2 + characterY);
   if (dy < 0) {
     rotate(11*PI/6);
   }
@@ -129,4 +147,10 @@ function createBirdSprite() {
   noFill();
   circle(-5, 0, birdHitboxDia);
   pop();
+}
+
+function createPipeSafeZone(x) {
+  safeZoneHeight = birdHitboxDia*2 + birdHitboxDia/2;
+  fill(0);
+  rect(x, safeZoneY, birdHitboxDia, safeZoneHeight);
 }
