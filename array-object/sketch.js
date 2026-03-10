@@ -7,6 +7,10 @@
 
 let symbols = ["bar", "bell", "cherries", "clover", "coin", "gem", "horseshoe", "seven"];
 let reelArray = [];
+let reelAmount = 3;
+let symbolOne;
+let symbolTwo;
+let symbolThree;
 
 function preload() {
   for (let i = 0; i < symbols.length; i++) {
@@ -17,21 +21,35 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  noStroke();
+  createReels();
 }
 
 function draw() {
   background(150);
-  createReels();
+  for (let reel of reelArray) {
+    rectMode(CENTER);
+    rect(reel.x, reel.y, reel.w, reel.h);
+  }
+  displaySymbols();
 }
 
 function createReels() {
-  let theReel = {
-    width: symbols[0].width,
-    height: symbols[0].height*2
-  };
-  reelArray.push(theReel);
-  
-  rect(width/2 - reel.width/2, height/2 - reel.height/2, reel.width, reel.height);
-  
+  let firstReel = width/2 - symbols[0].width;
+  for (let i = 0; i < reelAmount; i++) {
+    let theReel = {
+      x: firstReel + symbols[0].width * i-1,
+      y: height/2,
+      w: symbols[0].width,
+      h: symbols[0].height*2
+    };
+    reelArray.push(theReel);
+  }  
+}
+
+function displaySymbols() {
+  symbolOne = floor(random(0, symbols.length));
+  symbolTwo = floor(random(0, symbols.length));
+  symbolThree = floor(random(0, symbols.length));
+  imageMode(CENTER);
+  image(symbols[symbolOne], reelArray[0].x, height/2);
 }
