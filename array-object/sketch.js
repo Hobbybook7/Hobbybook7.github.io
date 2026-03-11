@@ -11,6 +11,8 @@ let reelAmount = 3;
 let symbolOne;
 let symbolTwo;
 let symbolThree;
+let spin = false;
+let displayingSymbols = false;
 
 function preload() {
   for (let i = 0; i < symbols.length; i++) {
@@ -22,6 +24,9 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   createReels();
+  symbolOne = floor(random(0, symbols.length));
+  symbolTwo = floor(random(0, symbols.length));
+  symbolThree = floor(random(0, symbols.length));
 }
 
 function draw() {
@@ -31,6 +36,7 @@ function draw() {
     rect(reel.x, reel.y, reel.w, reel.h);
   }
   displaySymbols();
+
 }
 
 function createReels() {
@@ -47,9 +53,49 @@ function createReels() {
 }
 
 function displaySymbols() {
-  symbolOne = floor(random(0, symbols.length));
-  symbolTwo = floor(random(0, symbols.length));
-  symbolThree = floor(random(0, symbols.length));
+  if (frameCount % 15 === 0) {
+    symbolOne = (symbolOne + 1) % symbols.length;
+    symbolTwo = (symbolTwo + 1) % symbols.length;
+    symbolThree = (symbolThree + 1) % symbols.length;
+  }
+  if (spin) {
+    spin = false;
+    displayingSymbols = true;
+  }
+  if (displayingSymbols) {
+    reelOne(symbolOne);
+    reelTwo(symbolTwo);
+    reelThree(symbolThree);
+  }
+}
+
+function reelOne(one) {
+  let top = (one + 1) % symbols.length
+  let bottom = (one - 1 + symbols.length) % symbols.length
   imageMode(CENTER);
-  image(symbols[symbolOne], reelArray[0].x, height/2);
+  image(symbols[top], reelArray[0].x, height/2 - reelArray[0].h/2);
+  image(symbols[one], reelArray[0].x, height/2);
+  image(symbols[bottom], reelArray[0].x, height/2 + reelArray[0].h/2);
+}
+
+function reelTwo(two) {
+  let top = (two + 1) % symbols.length
+  let bottom = (two - 1 + symbols.length) % symbols.length
+  imageMode(CENTER);
+  image(symbols[top], reelArray[1].x, height/2 - reelArray[0].h/2);
+  image(symbols[two], reelArray[1].x, height/2);
+  image(symbols[bottom], reelArray[1].x, height/2 + reelArray[0].h/2);
+}
+
+function reelThree(three) {
+  let top = (three + 1) % symbols.length
+  let bottom = (three - 1 + symbols.length) % symbols.length
+  imageMode(CENTER);
+  image(symbols[top], reelArray[2].x, height/2 - reelArray[0].h/2);
+  image(symbols[three], reelArray[2].x, height/2);
+  image(symbols[bottom], reelArray[2].x, height/2 + reelArray[0].h/2);
+}
+
+function mousePressed() {
+  spin = true;
 }
