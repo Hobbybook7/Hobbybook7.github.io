@@ -12,6 +12,9 @@ let reelAmount = 3;
 let spin = false;
 let displayingSymbols = false;
 let spinTime;
+
+let payoutTableButton;
+
 const ROLL_TIME = 3000;
 const ROLL_OFFSET = 250;
 
@@ -37,6 +40,7 @@ function draw() {
   drawReels();
   displaySymbols();
   createFrame();
+  payoutTable();
 }
 
 function createReels() {
@@ -127,8 +131,34 @@ function createFrame() {
   rect(rightFrameX - topFrameH/2, middleReel.y, topFrameH, middleReel.h);
 }
 
+function payoutTable() {
+  payoutTableButton = {
+    x: width/2,
+    y: height - 100,
+    w: 100,
+    h: 100,
+    r: 15
+  };
+  fill(80);
+  stroke(0);
+  rect(payoutTableButton.x, payoutTableButton.y, payoutTableButton.w, payoutTableButton.h, payoutTableButton.r);
+  fill(220);
+  textAlign(CENTER, CENTER);
+  textSize(25);
+  text("Payout", payoutTableButton.x, payoutTableButton.y - 15);
+  text("Table", payoutTableButton.x, payoutTableButton.y + 15);
+}
+
 function mouseClicked() {
-  if (!displayingSymbols) {
+  let mouseInPayoutButtonLeft = mouseX > payoutTableButton.x - payoutTableButton.w/2;
+  let mouseInPayoutButtonRight = mouseX < payoutTableButton.x + payoutTableButton.w/2;
+  let mouseInPayoutButtonTop = mouseY > payoutTableButton.y - payoutTableButton.h/2;
+  let mouseInPayoutButtonBottom = mouseY < payoutTableButton.y + payoutTableButton.h/2;
+
+  if (mouseInPayoutButtonLeft && mouseInPayoutButtonRight && mouseInPayoutButtonTop && mouseInPayoutButtonBottom) {
+    console.log("Payout");
+  }
+  else if (!displayingSymbols) {
     spin = true;
     spinTime = millis();
   }
