@@ -12,14 +12,21 @@ let symbolChoiceArray = [];
 let spin = false;
 let displayingSymbols = "No roll";
 let displayingPayout = false;
+let changingBet = false;
 
 let spinTime;
 let payoutTableButton;
+let changeBetButton;
 let sevenIndex;
+let rollTime;
+let rollSpeedTime;
+let balance;
 
 const REEL_AMOUNT = 3;
-const ROLL_TIME = 1500;
+const ROLL_SPEED = 50;
 const ROLL_OFFSET = 250;
+const ROLL_FLOOR = 500;
+const ROLL_ROOF = 2500; 
 
 function preload() {
   sevenIndex = symbols.indexOf("seven");
@@ -32,6 +39,10 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   createReels();
+  balance = getItem(balance);
+  if (balance === null) {
+    balance = 1000;
+  }
   for (let i = 0; i < 3; i++) {
     symbolChoiceArray.push(floor(random(0, symbols.length)));
   }
@@ -44,6 +55,8 @@ function draw() {
   displaySymbols();
   createFrame();
   payoutTable();
+  changeBet();
+  money();
 }
 
 function createReels() {
@@ -71,26 +84,31 @@ function drawReels() {
 function displaySymbols() {
   if (spin) {
     spin = false;
+    rollSpeedTime = millis() + ROLL_SPEED;
+    rollTime = random(ROLL_FLOOR, ROLL_ROOF);
     displayingSymbols = "firstReel";
   }
-  if (frameCount % 5 === 0) {
+  if (millis() > rollSpeedTime) {
+    rollSpeedTime = millis() + ROLL_SPEED;
     if (displayingSymbols === "firstReel") {
       symbolChoiceArray[0] = (symbolChoiceArray[0] + 1) % symbols.length;
-      if (millis() > spinTime + ROLL_TIME) {
+      if (millis() > spinTime + rollTime) {
         displayingSymbols = "secondReel";
+        rollTime = random(ROLL_FLOOR, ROLL_ROOF);
         spinTime = millis();
       }
     }
     else if ( displayingSymbols === "secondReel") {
       symbolChoiceArray[1] = (symbolChoiceArray[1] + 1) % symbols.length;
-      if (millis() > spinTime + ROLL_TIME + ROLL_OFFSET) {
+      if (millis() > spinTime + rollTime) {
         displayingSymbols = "thirdReel";
+        rollTime = random(ROLL_FLOOR, ROLL_ROOF);
         spinTime = millis();
       }
     }
     else if ( displayingSymbols === "thirdReel") {
       symbolChoiceArray[2] = (symbolChoiceArray[2] + 1) % symbols.length;
-      if (millis() > spinTime + ROLL_TIME + ROLL_OFFSET*2) {
+      if (millis() > spinTime + rollTime) {
         displayingSymbols = false;
         spinTime = millis();
         checkWin();
@@ -123,14 +141,14 @@ function checkWin() {
     else if (symbolOne === symbolTwo && symbolTwo === symbolThree) {
       console.log("10x");
     }
-    else if ((symbolOne === sevenIndex && symbolTwo === sevenIndex) ||
-             (symbolOne === sevenIndex && symbolThree === sevenIndex) ||
-             (symbolTwo === sevenIndex && symbolThree === sevenIndex)) {
+    else if (symbolOne === sevenIndex && symbolTwo === sevenIndex ||
+             symbolOne === sevenIndex && symbolThree === sevenIndex ||
+             symbolTwo === sevenIndex && symbolThree === sevenIndex) {
       console.log("2x");
     }
-    else if ((symbolOne === symbolTwo) ||
-             (symbolOne === symbolThree) ||
-             (symbolTwo === symbolThree)) {
+    else if (symbolOne === symbolTwo ||
+             symbolOne === symbolThree ||
+             symbolTwo === symbolThree) {
       console.log("1.5x");
     }
   }
@@ -163,7 +181,7 @@ function createFrame() {
 
 function payoutTable() {
   payoutTableButton = {
-    x: width/2,
+    x: width/3,
     y: height - 100,
     w: 100,
     h: 100,
@@ -201,14 +219,49 @@ function payoutTable() {
   }
 }
 
+function changeBet() {
+  changeBetButton = {
+    x: width/1.5,
+    y: height - 100,
+    w: 100,
+    h: 100,
+    r: 15
+  };
+  fill(80);
+  stroke(0);
+  rect(changeBetButton.x, changeBetButton.y, changeBetButton.w, changeBetButton.h, changeBetButton.r);
+  fill(220);
+  textAlign(CENTER, CENTER);
+  textSize(25);
+  text("Change", changeBetButton.x, changeBetButton.y - 15);
+  text("Bet", changeBetButton.x, changeBetButton.y + 15);
+
+  if (changingBet) {
+  }
+}
+
+function money() {
+  fill(0);
+  noStroke();
+  text(`Balance: $${balance}`, width/2, 20);
+}
+
 function mouseClicked() {
   let mouseInPayoutButtonLeft = mouseX > payoutTableButton.x - payoutTableButton.w/2;
   let mouseInPayoutButtonRight = mouseX < payoutTableButton.x + payoutTableButton.w/2;
   let mouseInPayoutButtonTop = mouseY > payoutTableButton.y - payoutTableButton.h/2;
   let mouseInPayoutButtonBottom = mouseY < payoutTableButton.y + payoutTableButton.h/2;
 
+  let mouseInChangeBetButtonLeft = mouseX > changeBetButton.x - changeBetButton.w/2;
+  let mouseInChangeBetButtonRight = mouseX < changeBetButton.x + changeBetButton.w/2;
+  let mouseInChangeBetButtonTop = mouseY > changeBetButton.y - changeBetButton.h/2;
+  let mouseInChangeBetButtonBottom = mouseY < changeBetButton.y + changeBetButton.h/2;
+
   if (mouseInPayoutButtonLeft && mouseInPayoutButtonRight && mouseInPayoutButtonTop && mouseInPayoutButtonBottom) {
     displayingPayout = !displayingPayout;
+  }
+  else if (mouseInChangeBetButtonLeft && mouseInChangeBetButtonRight && mouseInChangeBetButtonTop && mouseInChangeBetButtonBottom) {
+    changingBet = true;
   }
   else if ((!displayingSymbols || displayingSymbols === "No roll") && !displayingPayout) {
     spin = true;
