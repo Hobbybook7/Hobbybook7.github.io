@@ -7,6 +7,7 @@
 // - Explored saving to local storage using getItem and storeItem
 // - Explored using browser popups to get user input and display alerts
 // - Explored functions such as parseFloat and to toFixed to make the money in the correct format ($__.00)
+// - Realistic RTP (Return to player: ~88%) and house edge (~12%), ai assisted with math
 
 // Arrays used in project
 let symbols = ["bar", "bell", "cherries", "clover", "coin", "gem", "horseshoe", "seven"];
