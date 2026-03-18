@@ -5,34 +5,41 @@
 // Extra for Experts:
 // - Explored putting images in an array using a for loop
 // - Explored saving to local storage using getItem and storeItem
+// - Explored using browser popups to get user input and display alerts
 // - Explored functions such as parseFloat and to toFixed to make the money in the correct format ($__.00)
 
-
+// Arrays used in project
 let symbols = ["bar", "bell", "cherries", "clover", "coin", "gem", "horseshoe", "seven"];
 let reelArray = [];
 let symbolChoiceArray = [];
 
+// Booleans/State variables used in project
 let spin = false;
 let displayingSymbols = false;
 let displayingPayout = false;
 let changingBet = false;
+let win = false;
 
+// Assorted variables used in project
 let spinTime;
 let payoutTableButton;
 let changeBetButton;
 let sevenIndex;
 let rollTime;
 let rollSpeedTime;
+let displayWinTime;
 let winFactor;
 let balance;
 let bet;
 
+// Constants used in project
 const REEL_AMOUNT = 3;
 const ROLL_SPEED = 50;
 const ROLL_OFFSET = 250;
 const ROLL_FLOOR = 500;
 const ROLL_ROOF = 2500; 
 
+// Built in preload function for loading images
 function preload() {
   sevenIndex = symbols.indexOf("seven");
   for (let i = 0; i < symbols.length; i++) {
@@ -41,9 +48,12 @@ function preload() {
   }
 }
 
+// Built in setup function sets up for project
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // Calls createReels function to create the dimentions for each reel
   createReels();
+  // Loads balance from local storage in browser and sets balance to 1000 if never opened project before
   balance = getItem("balance");
   if (balance === null) {
     balance = 1000;
@@ -51,6 +61,7 @@ function setup() {
   else {
     balance = parseFloat(balance);
   }
+  // Loads bet from local storage in browser and sets bet to 5 if never opened project before
   bet = getItem("bet");
   if (bet === null) {
     bet = 5;
@@ -58,12 +69,14 @@ function setup() {
   else {
     bet = parseFloat(bet);
   }
+  // Chooses a random starting postion for the symbols on each reel
   for (let i = 0; i < 3; i++) {
     symbolChoiceArray.push(floor(random(0, symbols.length)));
   }
   spinTime = millis();
 }
 
+// Built in draw function calls all main funtions needed to run project
 function draw() {
   background(150);
   drawReels();
@@ -72,8 +85,10 @@ function draw() {
   payoutTable();
   createChangeBetButton();
   displaymoney();
+  displayWin();
 }
 
+// Creates the dimensions for each reel then pushs the reel to an array
 function createReels() {
   let firstReelX = width/2 - symbols[0].width;
   for (let i = 0; i < REEL_AMOUNT; i++) {
@@ -87,6 +102,7 @@ function createReels() {
   }  
 }
 
+// Draws each reel on the canvas
 function drawReels() {
   fill(255);
   stroke(0);
@@ -96,7 +112,9 @@ function drawReels() {
   }
 }
 
+// Function to display and roll through the symbols on each reel one at a time
 function displaySymbols() {
+  // If spin is set to true starts the spin cycle for the first reel and subtracts bet amount from balance
   if (spin) {
     spin = false;
     balance -= bet;
@@ -105,6 +123,7 @@ function displaySymbols() {
     rollTime = random(ROLL_FLOOR, ROLL_ROOF);
     displayingSymbols = "firstReel";
   }
+  // Spins through all symbols in order on the first reel for a randomly chosen rollSpeedTime
   if (millis() > rollSpeedTime) {
     rollSpeedTime = millis() + ROLL_SPEED;
     if (displayingSymbols === "firstReel") {
@@ -115,6 +134,7 @@ function displaySymbols() {
         spinTime = millis();
       }
     }
+    // Spins through all symbols in order on the second reel for a randomly chosen rollSpeedTime
     else if ( displayingSymbols === "secondReel") {
       symbolChoiceArray[1] = (symbolChoiceArray[1] + 1) % symbols.length;
       if (millis() > spinTime + rollTime) {
@@ -123,6 +143,7 @@ function displaySymbols() {
         spinTime = millis();
       }
     }
+    // Spins through all symbols in order on the third reel for a randomly chosen rollSpeedTime and calls checkWin function to check if a win exists
     else if ( displayingSymbols === "thirdReel") {
       symbolChoiceArray[2] = (symbolChoiceArray[2] + 1) % symbols.length;
       if (millis() > spinTime + rollTime) {
@@ -133,11 +154,13 @@ function displaySymbols() {
       }
     }
   }
+  // Calls the displaySymbolsOnReel function to put the images on the canvas in the right spot
   for (let i = 0; i < 3; i ++) {
     displaySymbolsOnReel(symbolChoiceArray[i], i);
   }
 }
 
+// Puts the symbol images on the canvas in the right spot on each reel
 function displaySymbolsOnReel(symbol, reel) {
   let top = (symbol + 1) % symbols.length;
   let bottom = (symbol - 1 + symbols.length) % symbols.length;
@@ -147,6 +170,22 @@ function displaySymbolsOnReel(symbol, reel) {
   image(symbols[bottom], reelArray[reel].x, height/2 + reelArray[0].h/2);
 }
 
+// Displays a Winner! screen if a win is present
+function displayWin() {
+  let winTime = 1500;
+  if (win !== false && millis() < displayWinTime + winTime) {
+    push();
+    textSize(70);
+    textStyle(BOLD);
+    fill(255);
+    rect(width/2, height/2, reelArray[0].w*4.5, reelArray[0].h, 60);
+    fill(0);
+    text(`${win}\n${winFactor}x`, width/2, height/2);
+    pop();
+  }
+}
+
+// Checks if a win is present and updates winFactor according the the paytable
 function checkWin() {
   if (!displayingSymbols) {
     let symbolOne = symbolChoiceArray[0];
@@ -155,26 +194,33 @@ function checkWin() {
 
     if (symbolOne === sevenIndex && symbolTwo === sevenIndex && symbolThree === sevenIndex) {
       winFactor = 150;
+      win = "Jackpot!!!!";
     }
     else if (symbolOne === symbolTwo && symbolTwo === symbolThree) {
       winFactor = 10;
+      win = "Crazy Win!!!";
     }
     else if (symbolOne === sevenIndex && symbolTwo === sevenIndex ||
              symbolOne === sevenIndex && symbolThree === sevenIndex ||
              symbolTwo === sevenIndex && symbolThree === sevenIndex) {
       winFactor = 2;
+      win = "Big Win!!";
     }
     else if (symbolOne === symbolTwo ||
              symbolOne === symbolThree ||
              symbolTwo === symbolThree) {
       winFactor = 1.5;
+      win = "Winner!";
     }
     else {
       winFactor = 0;
+      win = false;
     }
   }
+  displayWinTime = millis();
 }
 
+// Creates the red frame around reels
 function createFrame() {
   let middleReel = reelArray[1];
   let reelTop = middleReel.y - middleReel.h/2;
@@ -200,6 +246,7 @@ function createFrame() {
   pop();
 }
 
+// Creates the payout table and displays it if payoutButton is pressed
 function payoutTable() {
   payoutTableButton = {
     x: width/3,
@@ -240,6 +287,7 @@ function payoutTable() {
   }
 }
 
+// Creates the dimensions for the change bet button and displays it on the canvas
 function createChangeBetButton() {
   changeBetButton = {
     x: width/1.5,
@@ -258,6 +306,7 @@ function createChangeBetButton() {
   text("Bet", changeBetButton.x, changeBetButton.y + 15);
 }
 
+// Changes the bet based on user input on a popup screen in the browser
 function changeBet() {
   let tempBet;
   tempBet = prompt(`Enter a bet amount\nBalance: $${balance}`);
@@ -275,6 +324,7 @@ function changeBet() {
   }
 }
 
+// Displays the balance and bet amount at the top of the screen
 function displaymoney() {
   fill(0);
   noStroke();
@@ -282,6 +332,7 @@ function displaymoney() {
   text(`Bet: $${bet.toFixed(2)}`, width/2, 40);
 }
 
+// Changes the balance based on bet amount and the win factor
 function changeBalance() {
   let tempBet = bet;
   if (!displayingSymbols) {
@@ -290,7 +341,9 @@ function changeBalance() {
   storeItem("balance", balance);
 }
 
+// Built in function to detect if mouse button is clicked
 function mouseClicked() {
+  // Variables used to determine where payout table and change bet buttons are
   let mouseInPayoutButtonLeft = mouseX > payoutTableButton.x - payoutTableButton.w/2;
   let mouseInPayoutButtonRight = mouseX < payoutTableButton.x + payoutTableButton.w/2;
   let mouseInPayoutButtonTop = mouseY > payoutTableButton.y - payoutTableButton.h/2;
@@ -301,21 +354,26 @@ function mouseClicked() {
   let mouseInChangeBetButtonTop = mouseY > changeBetButton.y - changeBetButton.h/2;
   let mouseInChangeBetButtonBottom = mouseY < changeBetButton.y + changeBetButton.h/2;
 
+  // Toggles payout screen on or off when payout table button is pressed
   if (mouseInPayoutButtonLeft && mouseInPayoutButtonRight && mouseInPayoutButtonTop && mouseInPayoutButtonBottom) {
     displayingPayout = !displayingPayout;
   }
+  // Calls changeBet function if change bet button is pressed
   else if (mouseInChangeBetButtonLeft && mouseInChangeBetButtonRight && mouseInChangeBetButtonTop && mouseInChangeBetButtonBottom && !displayingSymbols) {
     changeBet();
   }
+  // Displays a browser alert popup if you try to spin reel with a bet amount higher than total balance
   else if (balance - bet < 0) {
     alert("Lower your bet\n(Or press up arrow to increase balance)");
   }
+  // Spins reel
   else if (!displayingSymbols && !displayingPayout) {
     spin = true;
     spinTime = millis();
   }
 }
 
+// Built in function used to increase balance if up arrow is pressed (Shhhh its a secret)
 function keyPressed() {
   if (keyCode === 38) {
     balance += 1000;
