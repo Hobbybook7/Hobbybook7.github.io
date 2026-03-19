@@ -6,6 +6,7 @@
 - [Ball Array](03-ball-array)
 - [Generative Art](04-art)
 - [Perlin Noise](05-noise)
+- [Grid](06-grid)
 
 ## Assignments
 - [Interactive Scene](interactive-scene)
